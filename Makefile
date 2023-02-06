@@ -1,3 +1,4 @@
+NAME ?= filelistbuilder
 VERSION ?= 0.0.5
 
 #go install golang.org/x/tools/cmd/goimports@latest
@@ -15,3 +16,24 @@ sanitize:
 	go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
     coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
 
+
+.PHONY: build-all
+build-all: sanitize build-prepare build-linux build-osx build-windows	
+.PHONY: build-prepare
+build-prepare:
+	@echo "Preparing talkeq ${VERSION}"
+	@rm -rf bin/*
+	@-mkdir -p bin/
+.PHONY: build-osx
+build-osx:
+	@echo "Building OSX ${VERSION}"
+	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -buildmode=pie -ldflags="-X main.Version=${VERSION} -s -w" -o bin/${NAME}-osx-x64 main.go
+.PHONY: build-linux
+build-linux:
+	@echo "Building Linux ${VERSION}"
+	@GOOS=linux GOARCH=amd64 go build -buildmode=pie -ldflags="-X main.Version=${VERSION} -w" -o bin/${NAME}-linux-x64 main.go		
+.PHONY: build-windows
+build-windows:
+	@echo "Building Windows ${VERSION}"
+	@GOOS=windows GOARCH=amd64 go build -buildmode=pie -ldflags="-X main.Version=${VERSION} -s -w" -o bin/${NAME}-win-x64.exe main.go
+	@GOOS=windows GOARCH=386 go build -buildmode=pie -ldflags="-X main.Version=${VERSION} -s -w" -o bin/${NAME}-win-x86.exe main.go

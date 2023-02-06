@@ -39,14 +39,18 @@ type FileEntry struct {
 	Size int64  `yaml:"size,omitempty"`
 }
 
-var ignoreList []FileEntry
-
-var fileList FileList
-var patchFile *zip.Writer
+var (
+	// Version is exported during build
+	Version    string
+	ignoreList []FileEntry
+	fileList   FileList
+	patchFile  *zip.Writer
+)
 
 func main() {
 	var err error
 	var out []byte
+	fmt.Printf("filelistbuilder v%s\n", Version)
 
 	inFile, err := os.ReadFile("filelistbuilder.yml")
 	if err != nil {
