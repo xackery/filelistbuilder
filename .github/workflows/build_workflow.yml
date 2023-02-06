@@ -64,6 +64,6 @@ jobs:
         files: |
           bin/filelistbuilder-linux-x64
           bin/filelistbuilder-darwin-x64
-          bin/filelistbuilder-win-x64
-          bin/filelistbuilder-win-x86
+          bin/filelistbuilder-win-x64.exe
+          bin/filelistbuilder-win-x86.exe
       if: ${{runner.os == 'Linux'}}
