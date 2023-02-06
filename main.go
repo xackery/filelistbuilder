@@ -158,6 +158,7 @@ func visit(path string, f os.FileInfo, err error) error {
 		return err
 	}
 	if strings.Contains(path, "eqemupatcher.exe") ||
+		strings.Contains(path, "README.md") ||
 		strings.Contains(path, ".gitignore") ||
 		strings.Contains(path, ".DS_Store") ||
 		strings.Contains(path, "filelistbuilder") ||
