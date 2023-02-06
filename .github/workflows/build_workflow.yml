@@ -62,8 +62,8 @@ jobs:
         prerelease: false
         title: "Latest Release"
         files: |
-          filelistbuilder-linux-x64
-          filelistbuilder-darwin-x64
-          filelistbuilder-win-x64
-          filelistbuilder-win-x86
+          bin/filelistbuilder-linux-x64
+          bin/filelistbuilder-darwin-x64
+          bin/filelistbuilder-win-x64
+          bin/filelistbuilder-win-x86
       if: ${{runner.os == 'Linux'}}
