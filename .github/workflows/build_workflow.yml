@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         go-version: [1.19]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -50,7 +50,10 @@ jobs:
         GOARCH: amd64
       working-directory: .
       run: |
-        make build-all
+        make build-linux
+        make build-windows
+        make build-darwin
+      if: ${{runner.os == 'Linux'}}
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -60,7 +63,7 @@ jobs:
         title: "Latest Release"
         files: |
           filelistbuilder-linux-x64
-          filelistbuilder-osx-x64
+          filelistbuilder-darwin-x64
           filelistbuilder-win-x64
           filelistbuilder-win-x86
       if: ${{runner.os == 'Linux'}}
