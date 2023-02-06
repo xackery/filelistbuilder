@@ -49,8 +49,24 @@ jobs:
         GOOS: windows
         GOARCH: amd64
       working-directory: .
-      run: go build
+      run: go build -o filelistbuilder.exe
       if: ${{runner.os == 'Windows'}}
+
+    - name: Build Linux binary
+      env:
+        GOOS: linux
+        GOARCH: amd64
+      working-directory: .
+      run: go build -o filelistbuilder-linux
+      if: ${{runner.os == 'Linux'}}
+
+    - name: Build Darwin binary
+      env:
+        GOOS: darwin
+        GOARCH: amd64
+      working-directory: .
+      run: go build -o filelistbuilder-darwin
+      if: ${{runner.os == 'Darwin'}}
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -69,5 +85,15 @@ jobs:
         prerelease: false
         title: "Build"
         files: |
-          filelistbuilder
+          filelistbuilder-linux
       if: ${{runner.os == 'Linux'}}
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: false
+        title: "Build"
+        files: |
+          filelistbuilder-darwin
+      if: ${{runner.os == 'Darwin'}}      
