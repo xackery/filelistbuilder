@@ -25,7 +25,6 @@ type Config struct {
 // FileList represents a file list
 type FileList struct {
 	Version        string      `yaml:"version,omitempty"`
-	PatcherHash    string      `yaml:"patcherhash,omitempty"`
 	Deletes        []FileEntry `yaml:"deletes,omitempty"`
 	DownloadPrefix string      `yaml:"downloadprefix,omitempty"`
 	Downloads      []FileEntry `yaml:"downloads,omitempty"`
@@ -76,9 +75,14 @@ func main() {
 	if len(os.Args) > 3 {
 		exePath := os.Args[3]
 		fmt.Println("passed argument 3 exePath:", exePath)
-		fileList.PatcherHash, err = getMd5(exePath)
+		var md5 string
+		md5, err = getMd5(exePath)
 		if err != nil {
 			fmt.Println("ignoring error exePath getmd5:", err)
+		}
+		err = os.WriteFile("eqemupatcher-hash.txt", []byte(md5), os.ModePerm)
+		if err != nil {
+			fmt.Println("ignoring error exePath:", err)
 		}
 	}
 
