@@ -6,6 +6,10 @@ VERSION ?= 0.1.4
 #go install golang.org/x/lint/golint@latest
 #go install honnef.co/go/tools/cmd/staticcheck@v0.2.2
 
+# CICD triggers this
+set-variable:
+	export VERSION=${VERSION}
+
 sanitize:
 	rm -rf vendor/
 	go vet -tags ci ./...
