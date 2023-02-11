@@ -7,6 +7,7 @@ VERSION := 0.1.5
 #go install honnef.co/go/tools/cmd/staticcheck@v0.2.2
 
 # CICD triggers this
+.PHONY: set-variable
 set-variable:
 	@$(shell export VERSION="${VERSION}")
 
