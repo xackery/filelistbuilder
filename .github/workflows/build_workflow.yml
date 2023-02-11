@@ -60,9 +60,9 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "${{ VERSION }}.${{ env.GITHUB_RUN_NUMBER }}"
+        automatic_release_tag: "${{ env.VERSION }}.${{ env.GITHUB_RUN_NUMBER }}"
         prerelease: false
-        title: "${{ VERSION }}.${{ env.GITHUB_RUN_NUMBER }}"
+        title: "${{ env.VERSION }}.${{ env.GITHUB_RUN_NUMBER }}"
         files: |
           bin/filelistbuilder-linux-x64
           bin/filelistbuilder-darwin-x64
