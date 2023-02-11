@@ -9,8 +9,8 @@ VERSION := 0.1.5
 # CICD triggers this
 .PHONY: set-variable
 set-variable:
-	@$(shell export VERSION="${VERSION}")
-
+	echo "::st-env name=VERSION::${VERSION}"
+	
 sanitize:
 	rm -rf vendor/
 	go vet -tags ci ./...
