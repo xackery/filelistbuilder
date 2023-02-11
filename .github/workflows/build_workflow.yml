@@ -56,6 +56,7 @@ jobs:
       if: ${{runner.os == 'Linux'}}
 
     - uses: "marvinpinto/action-automatic-releases@latest"
+      if: github.ref == 'refs/heads/master'
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
@@ -66,4 +67,3 @@ jobs:
           bin/filelistbuilder-darwin-x64
           bin/filelistbuilder-win-x64.exe
           bin/filelistbuilder-win-x86.exe
-      if: ${{runner.os == 'Linux'}}

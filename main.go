@@ -74,8 +74,9 @@ func main() {
 
 	h := md5.New()
 	if len(os.Args) > 3 {
-		fileList.PatcherHash, err = getMd5(os.Args[3])
-		fmt.Println("passed argument 3 exePath:", fileList.PatcherHash)
+		exePath := os.Args[3]
+		fmt.Println("passed argument 3 exePath:", exePath)
+		fileList.PatcherHash, err = getMd5(exePath)
 		if err != nil {
 			fmt.Println("ignoring error exePath getmd5:", err)
 		}
