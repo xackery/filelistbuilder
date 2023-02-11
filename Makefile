@@ -8,7 +8,7 @@ VERSION ?= 0.1.5
 
 # CICD triggers this
 set-variable:
-	export VERSION=${VERSION}
+	echo "VERSION=${VERSION}" >> $VERSION
 
 sanitize:
 	rm -rf vendor/
