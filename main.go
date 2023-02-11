@@ -57,7 +57,9 @@ func main() {
 
 	if len(os.Args) > 2 {
 		config.Client = os.Args[1]
+		fmt.Println("passed argument 1 client:", config.Client)
 		config.DownloadPrefix = os.Args[2]
+		fmt.Println("passed argument 2 downloadprefix:", config.DownloadPrefix)
 	} else {
 		inFile, err := os.ReadFile("filelistbuilder.yml")
 		if err != nil {
@@ -72,9 +74,10 @@ func main() {
 
 	h := md5.New()
 	if len(os.Args) > 3 {
+		fmt.Println("passed argument 3 exePath:", config.DownloadPrefix)
 		fileList.PatcherHash, err = getMd5(os.Args[3])
 		if err != nil {
-			fmt.Println("ignoring error exeHash:", err)
+			fmt.Println("ignoring error exePath getmd5:", err)
 		}
 	}
 
@@ -221,12 +224,13 @@ func getMd5(path string) (value string, err error) {
 
 	f, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	defer f.Close()
 
 	h := md5.New()
-	if _, err = io.Copy(h, f); err != nil {
+	_, err = io.Copy(h, f)
+	if err != nil {
 		return
 	}
 	value = fmt.Sprintf("%x", h.Sum(nil))
