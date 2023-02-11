@@ -1,5 +1,5 @@
 NAME ?= filelistbuilder
-VERSION ?= 0.0.6
+VERSION ?= 0.1.0
 
 #go install golang.org/x/tools/cmd/goimports@latest
 #go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
@@ -15,7 +15,10 @@ sanitize:
 	staticcheck -go 1.14 ./...
 	go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
     coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-
+run: build-darwin
+	cd bin && mkdir -p rof
+	cd bin/rof && echo "[LoginServer]" > eqhost.txt && echo "host=test.com:9000" >> eqhost.txt
+	cd bin && ./filelistbuilder-darwin-x64 rof https://test.com filelistbuilder-darwin-x64
 
 .PHONY: build-all
 build-all: sanitize build-prepare build-linux build-darwin build-windows	

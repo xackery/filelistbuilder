@@ -25,6 +25,7 @@ type Config struct {
 // FileList represents a file list
 type FileList struct {
 	Version        string      `yaml:"version,omitempty"`
+	PatcherHash    string      `yaml:"patcherhash,omitempty"`
 	Deletes        []FileEntry `yaml:"deletes,omitempty"`
 	DownloadPrefix string      `yaml:"downloadprefix,omitempty"`
 	Downloads      []FileEntry `yaml:"downloads,omitempty"`
@@ -52,23 +53,39 @@ func main() {
 	var out []byte
 	fmt.Printf("filelistbuilder v%s\n", Version)
 
-	inFile, err := os.ReadFile("filelistbuilder.yml")
-	if err != nil {
-		log.Fatal("Failed to parse filelistbuilder.yml:", err.Error())
-	}
 	config := Config{}
-	err = yaml.Unmarshal(inFile, &config)
-	if err != nil {
-		log.Fatal("Failed to unmarshal filelistbuilder.yml:", err.Error())
+
+	if len(os.Args) > 2 {
+		config.Client = os.Args[1]
+		config.DownloadPrefix = os.Args[2]
+	} else {
+		inFile, err := os.ReadFile("filelistbuilder.yml")
+		if err != nil {
+			log.Fatal("Failed to parse filelistbuilder.yml:", err.Error())
+		}
+
+		err = yaml.Unmarshal(inFile, &config)
+		if err != nil {
+			log.Fatal("Failed to unmarshal filelistbuilder.yml:", err.Error())
+		}
+	}
+
+	h := md5.New()
+	if len(os.Args) > 3 {
+		fileList.PatcherHash, err = getMd5(os.Args[3])
+		if err != nil {
+			fmt.Println("ignoring error exeHash:", err)
+		}
 	}
 
 	if len(config.Client) < 1 {
-		log.Fatal("client not set in filelistbuilder.yml")
+		log.Fatal("client not set in filelistbuilder.yml or args")
 	}
 
 	if len(config.DownloadPrefix) < 1 {
-		log.Fatal("downloadprefix not set in filelistbuilder.yml")
+		log.Fatal("downloadprefix not set in filelistbuilder.yml or args")
 	}
+
 	fileList.DownloadPrefix = config.DownloadPrefix
 
 	generateIgnores("ignore.txt")
@@ -78,7 +95,6 @@ func main() {
 		log.Fatal("Error filepath", err.Error())
 	}
 
-	h := md5.New()
 	io.WriteString(h, fmt.Sprintf("%d", time.Now().Nanosecond()))
 	for _, d := range fileList.Downloads {
 		io.WriteString(h, d.Name)
