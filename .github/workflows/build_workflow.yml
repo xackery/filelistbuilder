@@ -1,5 +1,7 @@
 name: Platform Tests & Build
 on: [push]
+env:
+  VERSION: 0.0.1
 
 jobs:
   platform_tests:
