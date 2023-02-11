@@ -3,7 +3,7 @@ on: [push]
 
 env:
   VERSION: 0.0.1
-  
+
 jobs:
   platform_tests:
     runs-on: ${{ matrix.os }}
@@ -54,6 +54,8 @@ jobs:
       working-directory: .
       run: |
         make set-variable
+        echo "VERSION=$VERSION" >> $VERSION
+        echo "Version set to $VERSION"
         make build-linux
         make build-windows
         make build-darwin
@@ -63,9 +65,9 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "${{ env.VERSION }}.${{ env.GITHUB_RUN_NUMBER }}"
+        automatic_release_tag: "${{ env.VERSION }}.${{ github.run_number }}"
         prerelease: false
-        title: "${{ env.VERSION }}.${{ env.GITHUB_RUN_NUMBER }}"
+        title: "${{ env.VERSION }}.${{ github.run_number }}"
         files: |
           bin/filelistbuilder-linux-x64
           bin/filelistbuilder-darwin-x64
