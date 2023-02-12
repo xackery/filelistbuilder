@@ -80,7 +80,7 @@ func main() {
 		if err != nil {
 			fmt.Println("ignoring error exePath getmd5:", err)
 		}
-		err = os.WriteFile("eqemupatcher-hash.txt", []byte(md5), os.ModePerm)
+		err = os.WriteFile("eqemupatcher-hash.txt", []byte(strings.ToUpper(md5)), os.ModePerm)
 		if err != nil {
 			fmt.Println("ignoring error exePath:", err)
 		}

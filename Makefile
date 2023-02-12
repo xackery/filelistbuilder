@@ -1,5 +1,5 @@
 NAME ?= filelistbuilder
-VERSION := 0.1.6
+VERSION := 0.1.7
 
 #go install golang.org/x/tools/cmd/goimports@latest
 #go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
