@@ -188,6 +188,7 @@ func visit(path string, f os.FileInfo, err error) error {
 		strings.Contains(path, "filelistbuilder") ||
 		strings.Contains(path, "filelist") ||
 		strings.Contains(path, "ignore.txt") ||
+		strings.Contains(path, "-hash.txt") ||
 		path == "patch.zip" {
 		return nil
 	}
