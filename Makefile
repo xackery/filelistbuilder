@@ -8,8 +8,8 @@ VERSION := 0.1.5
 
 # CICD triggers this
 .PHONY: set-variable
-set-variable:
-	@echo "VERSION=${VERSION}" >> $$VERSION
+set-version:
+	@echo "VERSION=${VERSION}" >> $$GITHUB_ENV
 	
 sanitize:
 	rm -rf vendor/
