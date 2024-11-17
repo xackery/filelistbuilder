@@ -2,3 +2,5 @@
 !filelistbuilder.yml
 !delete.txt
 coverage.out
+bin
+*.json

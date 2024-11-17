@@ -5,6 +5,7 @@ import (
 	"archive/zip"
 	"bufio"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/go-yaml/yaml"
+	"github.com/zeebo/xxh3"
 )
 
 // Config represents the configuration file
@@ -31,6 +33,19 @@ type FileList struct {
 	Unpacks        []FileEntry `yaml:"unpacks,omitempty"`
 }
 
+type Manifest struct {
+	ShortName      string            `json:"shortName"`
+	LongName       string            `json:"longName"`
+	CustomFilesURL string            `json:"customFilesUrl"`
+	FilesURLPrefix string            `json:"filesUrlPrefix"`
+	Version        string            `json:"version"`
+	Website        string            `json:"website"`
+	Description    string            `json:"description"`
+	Hosts          []string          `json:"hosts"`
+	Required       []string          `json:"required"`
+	Files          map[string]string `json:"files"`
+}
+
 // FileEntry represents a file entry
 type FileEntry struct {
 	Name string `yaml:"name,omitempty"`
@@ -44,6 +59,7 @@ var (
 	Version    string
 	ignoreList []FileEntry
 	fileList   FileList
+	manifest   Manifest
 	patchFile  *zip.Writer
 )
 
@@ -52,13 +68,42 @@ func main() {
 	var out []byte
 	fmt.Printf("filelistbuilder v%s\n", Version)
 
+	manifest.Files = make(map[string]string)
 	config := Config{}
 
-	if len(os.Args) > 2 {
+	fmt.Printf("Number of args: %d\n", len(os.Args))
+	if len(os.Args) == 4 {
 		config.Client = os.Args[1]
 		fmt.Println("passed argument 1 client:", config.Client)
 		config.DownloadPrefix = os.Args[2]
 		fmt.Println("passed argument 2 downloadprefix:", config.DownloadPrefix)
+
+	} else if len(os.Args) == 13 {
+		config.Client = os.Args[1]
+		fmt.Println("passed argument 1 client:", config.Client)
+		config.DownloadPrefix = os.Args[2]
+		fmt.Println("passed argument 2 downloadprefix:", config.DownloadPrefix)
+		//exe path is 3
+		manifest.ShortName = os.Args[4]
+		fmt.Println("passed argument 4 shortname:", manifest.ShortName)
+		manifest.LongName = os.Args[5]
+		fmt.Println("passed argument 5 longname:", manifest.LongName)
+		manifest.CustomFilesURL = os.Args[6]
+		fmt.Println("passed argument 6 customfilesurl:", manifest.CustomFilesURL)
+		manifest.FilesURLPrefix = os.Args[7]
+		fmt.Println("passed argument 7 filesurlprefix:", manifest.FilesURLPrefix)
+		manifest.Version = os.Args[8]
+		fmt.Println("passed argument 8 version:", manifest.Version)
+		manifest.Website = os.Args[9]
+		fmt.Println("passed argument 9 website:", manifest.Website)
+		manifest.Description = os.Args[10]
+		fmt.Println("passed argument 10 description:", manifest.Description)
+		host := os.Args[11]
+		fmt.Println("passed argument 11 host:", host)
+		manifest.Hosts = append(manifest.Hosts, host)
+		required := os.Args[12]
+		fmt.Println("passed argument 12 required:", required)
+		manifest.Required = append(manifest.Required, required)
 	} else {
 		inFile, err := os.ReadFile("filelistbuilder.yml")
 		if err != nil {
@@ -72,7 +117,7 @@ func main() {
 	}
 
 	h := md5.New()
-	if len(os.Args) > 3 {
+	if len(os.Args) == 3 {
 		exePath := os.Args[3]
 		fmt.Println("passed argument 3 exePath:", exePath)
 		var md5 string
@@ -123,11 +168,21 @@ func main() {
 		log.Fatal("Failed write: ", err)
 	}
 
+	out, err = json.MarshalIndent(&manifest, "", "    ")
+	if err != nil {
+		log.Fatal("Error marshalling manifest:", err.Error())
+	}
+
+	err = os.WriteFile("manifest.json", out, 0644)
+	if err != nil {
+		log.Fatal("Failed manifest.json write: ", err)
+	}
+
 	//Now let's make patch zip.
 	createPatch()
 
 	log.Println("Wrote filelist_"+config.Client+".yml and patch.zip with", len(fileList.Downloads), "files inside.")
-
+	log.Println("Wrote manifest.json with", len(manifest.Files), "files inside.")
 }
 
 func createPatch() {
@@ -222,6 +277,13 @@ func visit(path string, f os.FileInfo, err error) error {
 		download.Md5 = md5Val
 
 		fileList.Downloads = append(fileList.Downloads, download)
+
+		xxh3Val, err := getXXH3(path)
+		if err != nil {
+			log.Fatal("Failed to xxh3", path, err.Error())
+		}
+
+		manifest.Files[path] = xxh3Val
 	}
 	return nil
 }
@@ -235,6 +297,23 @@ func getMd5(path string) (value string, err error) {
 	defer f.Close()
 
 	h := md5.New()
+	_, err = io.Copy(h, f)
+	if err != nil {
+		return
+	}
+	value = fmt.Sprintf("%x", h.Sum(nil))
+	return
+}
+
+func getXXH3(path string) (value string, err error) {
+
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	h := xxh3.New()
 	_, err = io.Copy(h, f)
 	if err != nil {
 		return
