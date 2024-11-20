@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cespare/xxhash"
 	"github.com/go-yaml/yaml"
-	"github.com/zeebo/xxh3"
 )
 
 // Config represents the configuration file
@@ -35,16 +35,16 @@ type FileList struct {
 }
 
 type Manifest struct {
-	ShortName      string            `json:"shortName"`
-	LongName       string            `json:"longName"`
-	CustomFilesURL string            `json:"customFilesUrl"`
-	FilesURLPrefix string            `json:"filesUrlPrefix"`
-	Version        string            `json:"version"`
-	Website        string            `json:"website"`
-	Description    string            `json:"description"`
-	Hosts          []string          `json:"hosts"`
-	Required       []string          `json:"required"`
-	Files          map[string]string `json:"files"`
+	ShortName      string            `json:"shortName" yaml:"shortName"`
+	LongName       string            `json:"longName" yaml:"longName"`
+	Website        string            `json:"website" yaml:"website"`
+	Description    string            `json:"description" yaml:"description"`
+	Hosts          []string          `json:"hosts" yaml:"hosts"`
+	CustomFilesURL string            `json:"customFilesUrl" yaml:"customFilesUrl"`
+	FilesURLPrefix string            `json:"filesUrlPrefix" yaml:"filesUrlPrefix"`
+	Version        string            `json:"version" yaml:"version"`
+	Required       []string          `json:"required" yaml:"required"`
+	Files          map[string]string `json:"files" yaml:"files"`
 }
 
 // FileEntry represents a file entry
@@ -287,7 +287,7 @@ func visit(path string, f os.FileInfo, err error) error {
 			log.Fatal("Failed to xxh3", path, err.Error())
 		}
 
-		manifest.Files[path] = xxh3Val
+		manifest.Files[strings.ReplaceAll(path, "\\", "/")] = xxh3Val
 	}
 	return nil
 }
@@ -309,21 +309,32 @@ func getMd5(path string) (value string, err error) {
 	return
 }
 
-func getXXH3(path string) (value string, err error) {
-
-	f, err := os.Open(path)
+func getXXH3(filePath string) (string, error) {
+	file, err := os.Open(filePath)
 	if err != nil {
-		return
+		return "", fmt.Errorf("open %s: %w", filePath, err)
 	}
-	defer f.Close()
+	defer file.Close()
 
-	h := xxh3.New()
-	_, err = io.Copy(h, f)
-	if err != nil {
-		return
+	hasher := xxhash.New()
+
+	buffer := make([]byte, 4096)
+	for {
+		bytesRead, err := file.Read(buffer)
+		if err != nil && err != io.EOF {
+			return "", err
+		}
+		if bytesRead == 0 {
+			break
+		}
+
+		_, hashErr := hasher.Write(buffer[:bytesRead])
+		if hashErr != nil {
+			return "", hashErr
+		}
 	}
-	value = fmt.Sprintf("%x", h.Sum(nil))
-	return
+
+	return fmt.Sprintf("%016X", hasher.Sum64()), nil
 }
 
 func generateIgnores(path string) (err error) {
