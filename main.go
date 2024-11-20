@@ -20,8 +20,9 @@ import (
 
 // Config represents the configuration file
 type Config struct {
-	Client         string `yaml:"client,omitempty"`
-	DownloadPrefix string `yaml:"downloadprefix,omitempty"`
+	Client         string   `yaml:"client,omitempty"`
+	DownloadPrefix string   `yaml:"downloadprefix,omitempty"`
+	Manifest       Manifest `yaml:"manifest,omitempty"`
 }
 
 // FileList represents a file list
@@ -114,6 +115,9 @@ func main() {
 		if err != nil {
 			log.Fatal("Failed to unmarshal filelistbuilder.yml:", err.Error())
 		}
+
+		manifest = config.Manifest
+		manifest.Files = make(map[string]string)
 	}
 
 	h := md5.New()

@@ -28,6 +28,10 @@ run-nexus: build-linux
 	cd bin && mkdir -p rof
 	cd bin/rof && echo "[LoginServer]" > eqhost.txt && echo "host=test.com:9000" >> eqhost.txt
 	cd bin && ./filelistbuilder-linux-x64 rof https://test.com filelistbuilder-linux-x64 thj "The Heroes Journey" "https://raw.githubusercontent.com/The-Heroes-Journey-EQEMU/eqemupatcher/refs/heads/master/rof" "https://raw.githubusercontent.com/The-Heroes-Journey-EQEMU/eqemupatcher/refs/heads/master/rof" "0.1" "https://heroesjourneyemu.com/" "The Heroes’ Journey is a new spin on an old classic. Aiming to give players the chance to relive some of their fondest memories as the heroes they once were. Only this time instead of being bound to a single class path, players may choose to walk three paths at the same time, attaining incredible power through thousands of AAs, spells, and disciplines while personally progressing through each expansion seeking out Enchanted and Legendary versions of their favorite gear." "66.70.227.48" "dinput8.dll"
+run-nexus-noarg: build-linux
+	cd bin && mkdir -p rof
+	cd bin/rof && echo "[LoginServer]" > eqhost.txt && echo "host=test.com:9000" >> eqhost.txt
+	cd bin && ./filelistbuilder-linux-x64
 .PHONY: build-all
 build-all: sanitize build-prepare build-linux build-darwin build-windows	
 .PHONY: build-prepare
